@@ -12,8 +12,13 @@ export default function Home() {
 	const [textFilter, setTextFilter] = useState("");
 
 	const filteredGames = useMemo(
-		() => games.filter((game) => game.tags.some((tag) => currentTags[tag])),
-		[games, currentTags]
+		() =>
+			games.filter(
+				(game) =>
+					game.tags.some((tag) => currentTags[tag]) &&
+					game.title.toLowerCase().includes(textFilter.toLowerCase())
+			),
+		[games, currentTags, textFilter]
 	);
 
 	return (
@@ -44,6 +49,8 @@ export default function Home() {
 				<input
 					className="w-full rounded-md py-2 px-3 text-xl focus:outline-none focus:ring-2 focus:ring-pink-300 my-2 text-gray-900"
 					placeholder="Search for game"
+					value={textFilter}
+					onChange={(e) => setTextFilter(e.target.value)}
 				/>
 			</div>
 
