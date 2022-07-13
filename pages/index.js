@@ -1,13 +1,18 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import games from "../constants/games";
 import categories from "../constants/categories";
 import { DraggableScroll } from "../components/DraggableScroll";
 import GameCard from "../components/GameCard";
 
+const falseTags = Object.fromEntries(
+	categories.map((category) => [category.name, false])
+);
+const trueTags = Object.fromEntries(
+	categories.map((category) => [category.name, true])
+);
+
 export default function Home() {
-	const [currentTags, setCurrentTags] = useState(
-		Object.fromEntries(categories.map((category) => [category.name, true]))
-	);
+	const [currentTags, setCurrentTags] = useState(trueTags);
 
 	const [textFilter, setTextFilter] = useState("");
 
@@ -15,11 +20,29 @@ export default function Home() {
 		() =>
 			games.filter(
 				(game) =>
-					game.tags.some((tag) => currentTags[tag]) &&
-					game.title.toLowerCase().includes(textFilter.toLowerCase())
+					(game.tags.some((tag) => currentTags[tag]) ||
+						currentTags.all) &&
+					(game.title
+						.toLowerCase()
+						.includes(textFilter.toLowerCase()) ||
+						game.description
+							.toLowerCase()
+							.includes(textFilter.toLowerCase()))
 			),
-		[games, currentTags, textFilter]
+		[currentTags, textFilter]
 	);
+
+	const toggleTags = (e) => {
+		if (e.target.name === "all")
+			return setCurrentTags((current) =>
+				current.all ? falseTags : trueTags
+			);
+		setCurrentTags((current) => ({
+			...current,
+			all: false,
+			[e.target.name]: !current[e.target.name],
+		}));
+	};
 
 	return (
 		<div className="flex flex-col">
@@ -33,12 +56,7 @@ export default function Home() {
 								? "bg-pink-500"
 								: "bg-transparent"
 						}`}
-						onClick={useCallback((e) => {
-							setCurrentTags((current) => ({
-								...current,
-								[e.target.name]: !current[e.target.name],
-							}));
-						}, [])}
+						onClick={toggleTags}
 					>
 						{category.title}
 					</button>
@@ -54,7 +72,7 @@ export default function Home() {
 				/>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 px-5 mt-8">
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 px-5 mt-8">
 				{filteredGames.map((game, index) => (
 					<GameCard {...game} key={index} />
 				))}
