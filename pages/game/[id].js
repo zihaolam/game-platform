@@ -1,24 +1,31 @@
 import Link from "next/link";
 import { useState, useRef } from "react";
-import { useRouter } from "next/router";
 import games from "../../constants/games";
 import { CgSpinner } from "react-icons/cg";
 
-const GamePage = () => {
-	const router = useRouter();
-	const { id } = router.query;
+export async function getStaticPaths() {
+	return {
+		paths: games.map((game) => ({
+			params: { id: JSON.stringify(game.id) },
+		})),
+		fallback: true, // false or 'blocking'
+	};
+}
+
+export async function getStaticProps({ params }) {
+	return {
+		props: {
+			game: games.find((game) => game.id == params.id),
+		}, // will be passed to the page component as props
+	};
+}
+
+const GamePage = ({ game }) => {
+	// const router = useRouter();
+	// const { id } = router.query;
 	const iframeRef = useRef(null);
 	const [loadingIFrame, setLoadingIFrame] = useState(true);
 
-	const setupIFrame = () => {
-		setLoadingIFrame(false);
-		console.log(
-			iframeRef.current.contentWindow.width,
-			iframeRef.current.contentWindow.height
-		);
-	};
-
-	const currentGame = games.find((game) => game.id === parseInt(id));
 	return (
 		<div className="mt-4">
 			<Link href="/">
@@ -29,8 +36,8 @@ const GamePage = () => {
 			<div className="px-5 mt-5 flex flex-col min-h-[500px] w-full">
 				<div className="flex flex-col sm:flex-row justify-between">
 					<div className="text-2xl text-pink-500 font-bold flex items-center space-x-3">
-						<span>{currentGame?.title}</span>
-						{currentGame?.tags.map((tag, index) => (
+						<span>{game?.title}</span>
+						{game?.tags.map((tag, index) => (
 							<span
 								className="rounded-lg px-2 bg-pink-500 text-white flex items-center text-sm"
 								key={index}
@@ -40,7 +47,7 @@ const GamePage = () => {
 						))}
 					</div>
 					<div className="text-pink-500 font-bold flex items-end text-sm">
-						Made By: {currentGame?.madeBy}
+						Made By: {game?.madeBy}
 					</div>
 				</div>
 				{loadingIFrame && (
@@ -54,11 +61,11 @@ const GamePage = () => {
 					}}
 					id="gameIFrame"
 					className="w-full min-h-[600px]"
-					src={currentGame?.gameSrc}
+					src={game?.gameSrc}
 					ref={iframeRef}
 				></iframe>
 				<div className="font-bold text-sm mt-1 text-pink-400">
-					{currentGame?.description}
+					{game?.description}
 				</div>
 			</div>
 		</div>
