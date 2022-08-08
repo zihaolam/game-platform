@@ -7,7 +7,8 @@
 		"build": "next build && next export",
 		"start": "next start",
 		"lint": "next lint",
-		"deploy": "scp -r ./out/. ts03ml19mse4@geniusdevelopment.com:~/public_html/game.geniusdevelopment.com"
+		"deploy": "scp -r ./out/. ts03ml19mse4@geniusdevelopment.com:~/public_html/game.geniusdevelopment.com",
+		"bd": "yarn build && yarn deploy"
 	},
 	"dependencies": {
 		"daisyui": "^2.19.0",
